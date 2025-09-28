@@ -1,333 +1,240 @@
-        <!doctype html>
-
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Party Guessing Game — Single File</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Party Guessing Game</title>
   <style>
-    :root{
-      --primary:#c8102e; /* consistent color */
-      --bg:#0f172a;
-      --card-bg: #0b1220;
-      --muted: #94a3b8;
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      background: #fafafa;
+      color: #333;
     }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;background:linear-gradient(180deg,#071029, #07182b);color:#e6eef8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-    .app{width:100%;max-width:900px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.7)}
-    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-    header h1{font-size:1.2rem;margin:0}
-    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    select,input[type=number]{background:transparent;border:1px solid rgba(255,255,255,0.08);padding:8px 10px;border-radius:8px;color:inherit}
-    button{background:var(--primary);border:none;color:white;padding:9px 12px;border-radius:8px;font-weight:600;cursor:pointer}
-    .flex-row{display:flex;gap:12px;align-items:center}.game-area{display:grid;grid-template-columns:1fr 280px;gap:16px}
-
-/* Card area */
-.card-stage{background:var(--card-bg);border-radius:10px;padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:420px}
-.timer{font-weight:700;font-size:1.05rem;color:var(--primary)}
-.card{position:relative;width:100%;max-width:560px;height:320px;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#081226, #071a2a);display:flex;align-items:center;justify-content:center}
-.card img{width:100%;height:100%;object-fit:cover;display:block}
-.caption{position:absolute;left:12px;bottom:10px;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);padding:6px 10px;border-radius:999px;font-weight:600}
-.overlay{position:absolute;inset:0;display:flex}
-.overlay > div{flex:1}
-.overlay > div:hover{cursor:pointer;background:linear-gradient(90deg, rgba(255,255,255,0.03), transparent)}
-.overlay .left{display:flex;align-items:center;justify-content:flex-start;padding-left:10px}
-.overlay .right{display:flex;align-items:center;justify-content:flex-end;padding-right:10px}
-.big-btn{font-size:1.35rem;padding:6px 12px;border-radius:10px;background:rgba(0,0,0,0.35);}
-
-/* Sidebar */
-.sidebar{background:linear-gradient(180deg,#071226,#061220);padding:12px;border-radius:10px;min-height:420px}
-.stats{display:flex;flex-direction:column;gap:8px}
-.stat{display:flex;justify-content:space-between;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02)}
-.list{margin-top:12px;max-height:220px;overflow:auto}
-.list .item{display:flex;gap:8px;align-items:center;padding:6px;border-radius:6px}
-.list img{width:46px;height:46px;object-fit:cover;border-radius:6px}
-
-/* Results modal (simple) */
-.results{position:fixed;inset:0;background:rgba(2,6,23,0.7);display:none;align-items:center;justify-content:center;padding:20px}
-.results .panel{background:#071627;padding:18px;border-radius:10px;max-width:700px;width:100%}
-.results h2{margin-top:0}
-footer{margin-top:12px;text-align:center;color:var(--muted);font-size:0.9rem}
-
-@media (max-width:880px){.game-area{grid-template-columns:1fr}.sidebar{order:2}}
-
+    header {
+      background: #c8102e;
+      color: #fff;
+      padding: 1rem;
+      font-size: 1.2rem;
+    }
+    .controls {
+      margin: 1rem;
+    }
+    .controls select,
+    .controls input,
+    .controls button {
+      margin: 0.5rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    .game {
+      position: relative;
+      margin: 1rem auto;
+      max-width: 600px;
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .timer {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      padding: 0.3rem 0.6rem;
+      border-radius: 0.5rem;
+      font-size: 1.2rem;
+    }
+    .card {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+    .card.active {
+      display: flex;
+    }
+    .card img {
+      width: 100%;
+      height: auto;
+      border-bottom: 1px solid #ddd;
+    }
+    .card-title {
+      font-size: 1.3rem;
+      margin: 1.2rem 0 1rem; /* Added extra top margin to avoid overlap */
+      font-weight: bold;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 1rem;
+      max-width: 500px;
+      text-align: left;
+      overflow-y: auto;
+      max-height: 90vh;
+    }
+    .results-list img {
+      height: 40px;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+    .button-red {
+      border: 2px solid #c8102e;
+      background: transparent;
+      color: #333;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .button-red:hover,
+    .button-red:active {
+      background: #c8102e;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <h1>Party Guessing Game</h1>
-      <div class="controls">
-        <div class="flex-row">
-          <label for="deck">Deck</label>
-          <select id="deck">
-            <option value="animals">Animals</option>
-            <option value="movies">Bollywood Movies</option>
-          </select>
-        </div>
-        <div class="flex-row">
-          <label for="timeSec">Time (sec)</label>
-          <input id="timeSec" type="number" min="10" value="60" />
-        </div>
-        <button id="startBtn">Start Game</button>
-      </div>
-    </header><main class="game-area">
-  <section class="card-stage">
-    <div class="timer">Time left: <span id="timeLeft">0</span>s</div>
-    <div class="card" id="card">
-      <img id="cardImg" src="" alt="card image" />
-      <div class="caption" id="caption">Press Start</div>
-      <div class="overlay" id="overlay">
-        <div class="left"><div class="big-btn">❌</div></div>
-        <div class="right"><div class="big-btn">✅</div></div>
-      </div>
-    </div>
-    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;justify-content:center">
-      <button id="wrongBtn">Mark Wrong (Left)</button>
-      <button id="rightBtn">Mark Correct (Right)</button>
-    </div>
-  </section>
-
-  <aside class="sidebar">
-    <div class="stats">
-      <div class="stat"><span>Correct</span><strong id="correctCount">0</strong></div>
-      <div class="stat"><span>Wrong</span><strong id="wrongCount">0</strong></div>
-      <div class="stat"><span>Score</span><strong id="score">0</strong></div>
-    </div>
-
-    <div class="list" id="correctList">
-      <!-- correct guesses thumbnails -->
-    </div>
-    <div class="list" id="wrongList">
-      <!-- wrong guesses thumbnails -->
-    </div>
-  </aside>
-</main>
-
-<footer>
-  Tip: Tap the right half to mark correct, left half for wrong. You can also use keyboard → (correct) and ← (wrong).
-</footer>
-
-  </div>  <!-- results modal -->  <div class="results" id="results">
-    <div class="panel">
-      <h2>Time's up!</h2>
-      <p id="resultSummary"></p>
-      <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
-        <button id="playAgain">Play Again</button>
-        <button id="downloadReport">Download Report (JSON)</button>
-        <button id="closeResults">Close</button>
-      </div>
-      <div style="margin-top:12px;max-height:300px;overflow:auto" id="resultsDetails"></div>
+  <header>Party Guessing Game</header>
+  <div class="controls">
+    <select id="deck">
+      <option value="animals">Animals</option>
+      <option value="bollywood">Bollywood Movies</option>
+    </select>
+    <input id="time" type="number" value="60" min="10" /> seconds
+    <button class="button-red" onclick="startGame()">Start</button>
+  </div>
+  <div class="game" id="game">
+    <div class="timer" id="timer"></div>
+  </div>  <div class="modal" id="resultsModal">
+    <div class="modal-content">
+      <h2>Results</h2>
+      <p>Correct: <span id="correctCount"></span></p>
+      <p>Wrong: <span id="wrongCount"></span></p>
+      <h3>Correct Guesses</h3>
+      <div class="results-list" id="correctList"></div>
+      <h3>Wrong Guesses</h3>
+      <div class="results-list" id="wrongList"></div>
+      <button class="button-red" onclick="downloadResults()">Download JSON</button>
+      <button class="button-red" onclick="closeModal()">Close</button>
     </div>
   </div>  <script>
-    // --- CONFIG ---
-    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary') || '#c8102e';
-
-    // Animals (names) — we'll use the Unsplash Source endpoint for images (no API key required)
-    const ANIMALS = [
-      'Lion','Tiger','Elephant','Monkey','Giraffe','Zebra','Dog','Cat','Horse','Rabbit','Panda','Koala','Kangaroo'
+    const animals = [
+      "🦁 Lion","🐯 Tiger","🐘 Elephant","🦓 Zebra","🦒 Giraffe","🐒 Monkey","🐼 Panda","🐍 Snake","🦅 Eagle","🐧 Penguin"
+    ];
+    const movies = [
+      "Dilwale Dulhania Le Jayenge","Sholay","3 Idiots","Lagaan","Dangal","Kabhi Khushi Kabhie Gham","Mughal-e-Azam","PK","Zindagi Na Milegi Dobara","Gully Boy"
     ];
 
-    // Bollywood movie titles (popular ones) — we'll attempt to fetch posters from Wikipedia using the pageimages API
-    const MOVIES = [
-      '3 Idiots','Dangal','Lagaan','Sholay','Kabhi Khushi Kabhie Gham','Dilwale Dulhania Le Jayenge','Kuch Kuch Hota Hai','PK','Bajrangi Bhaijaan','Andhadhun'
-    ];
+    let currentDeck = [];
+    let currentIndex = 0;
+    let timerInterval;
+    let timeLeft;
+    let correctGuesses = [];
+    let wrongGuesses = [];
 
-    // Helper: shuffle in-place
-    function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-
-    // --- State ---
-    let deck = [] // array of {title, img}
-    let index = 0
-    let rightGuesses = []
-    let wrongGuesses = []
-    let timer = null
-    let timeLeft = 0
-
-    // DOM
-    const deckSelect = document.getElementById('deck')
-    const timeSec = document.getElementById('timeSec')
-    const startBtn = document.getElementById('startBtn')
-    const cardImg = document.getElementById('cardImg')
-    const caption = document.getElementById('caption')
-    const overlay = document.getElementById('overlay')
-    const timeLeftEl = document.getElementById('timeLeft')
-    const correctCount = document.getElementById('correctCount')
-    const wrongCount = document.getElementById('wrongCount')
-    const scoreEl = document.getElementById('score')
-    const correctList = document.getElementById('correctList')
-    const wrongList = document.getElementById('wrongList')
-
-    const resultsModal = document.getElementById('results')
-    const resultSummary = document.getElementById('resultSummary')
-    const resultsDetails = document.getElementById('resultsDetails')
-    const playAgainBtn = document.getElementById('playAgain')
-    const downloadReportBtn = document.getElementById('downloadReport')
-    const closeResultsBtn = document.getElementById('closeResults')
-    const wrongBtn = document.getElementById('wrongBtn')
-    const rightBtn = document.getElementById('rightBtn')
-
-    // --- Image fetchers ---
-    // Unsplash Source: quick anonymous images without API key. Example: https://source.unsplash.com/800x600/?lion
-    // We'll append a signature to reduce caching.
-    function unsplashFor(query){
-      const sig = Date.now().toString(36) + Math.floor(Math.random()*1000)
-      return `https://source.unsplash.com/800x600/?${encodeURIComponent(query)}&sig=${sig}`
-    }
-
-    // Wikipedia pageimages API: returns thumbnails for many movie pages (no API key). We'll use origin=* for CORS.
-    async function wikiPosterFor(title){
-      const api = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=' + encodeURIComponent(title)
-      try{
-        const res = await fetch(api)
-        const data = await res.json()
-        if(data && data.query && data.query.pages){
-          const pages = data.query.pages
-          const page = pages[Object.keys(pages)[0]]
-          if(page && page.thumbnail && page.thumbnail.source){
-            return page.thumbnail.source
-          }
-        }
-      }catch(e){
-        console.warn('wiki poster failed',e)
-      }
-      // fallback to unsplash search for 'bollywood poster title'
-      return unsplashFor('bollywood poster ' + title)
-    }
-
-    // Build deck for selected type, prefetch images
-    async function buildDeck(type){
-      if(type === 'animals'){
-        // simple: map animals to unsplash images
-        const arr = ANIMALS.map(a=>({title:a, img:unsplashFor(a)}))
-        return shuffle(arr)
-      }else{
-        // movies: try to fetch posters from wikipedia for each movie (fetch in parallel)
-        const promises = MOVIES.map(async (m)=>{
-          const img = await wikiPosterFor(m)
-          return {title:m, img}
-        })
-        const results = await Promise.all(promises)
-        return shuffle(results)
+    async function fetchImage(query, type) {
+      if(type === "animals") {
+        return `https://source.unsplash.com/800x600/?${query.split(' ')[1]}&sig=${Math.random()}`;
+      } else {
+        const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=${encodeURIComponent(query)}`;
+        try {
+          const res = await fetch(url);
+          const data = await res.json();
+          const pages = data.query.pages;
+          const page = Object.values(pages)[0];
+          if(page.thumbnail) return page.thumbnail.source;
+        } catch(e) { console.log(e); }
+        return `https://source.unsplash.com/800x600/?movie,poster&sig=${Math.random()}`;
       }
     }
 
-    // UI updates
-    function renderCard(){
-      if(!deck.length){
-        cardImg.src = ''
-        caption.textContent = 'No cards'
-        return
-      }
-      const item = deck[index % deck.length]
-      cardImg.src = item.img
-      cardImg.alt = item.title
-      caption.textContent = item.title
-    }
-
-    function updateStats(){
-      correctCount.textContent = rightGuesses.length
-      wrongCount.textContent = wrongGuesses.length
-      scoreEl.textContent = rightGuesses.length - wrongGuesses.length
-
-      // lists
-      correctList.innerHTML = ''
-      rightGuesses.slice().reverse().forEach(g=>{
-        const el = document.createElement('div');el.className='item';
-        el.innerHTML = `<img src="${g.img}" alt="" /><div style="flex:1"><strong>${g.title}</strong></div>`
-        correctList.appendChild(el)
-      })
-
-      wrongList.innerHTML = ''
-      wrongGuesses.slice().reverse().forEach(g=>{
-        const el = document.createElement('div');el.className='item';
-        el.innerHTML = `<img src="${g.img}" alt="" /><div style="flex:1"><strong>${g.title}</strong></div>`
-        wrongList.appendChild(el)
-      })
-    }
-
-    // Start / stop
     async function startGame(){
-      startBtn.disabled = true
-      startBtn.textContent = 'Preparing...'
-      rightGuesses = []
-      wrongGuesses = []
-      updateStats()
-      deck = await buildDeck(deckSelect.value)
-      index = 0
-      renderCard()
+      document.getElementById("game").innerHTML = '<div class="timer" id="timer"></div>';
+      correctGuesses = [];
+      wrongGuesses = [];
+      const deckChoice = document.getElementById("deck").value;
+      currentDeck = deckChoice === "animals" ? [...animals] : [...movies];
+      currentDeck.sort(() => Math.random() - 0.5);
+      currentIndex = 0;
+      timeLeft = parseInt(document.getElementById("time").value);
+      document.getElementById("timer").textContent = timeLeft;
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").textContent = timeLeft;
+        if(timeLeft <= 0) endGame();
+      }, 1000);
+      showCard();
+    }
 
-      timeLeft = Math.max(10, parseInt(timeSec.value,10)||60)
-      timeLeftEl.textContent = timeLeft
-
-      timer = setInterval(()=>{
-        timeLeft -= 1
-        timeLeftEl.textContent = timeLeft
-        if(timeLeft <= 0){
-          endGame()
+    async function showCard(){
+      if(currentIndex >= currentDeck.length){
+        endGame();
+        return;
+      }
+      const item = currentDeck[currentIndex];
+      const type = document.getElementById("deck").value;
+      const img = await fetchImage(item, type);
+      const card = document.createElement("div");
+      card.className = "card active";
+      card.innerHTML = `<img src="${img}" alt="${item}"><div class="card-title">${item}</div>`;
+      const game = document.getElementById("game");
+      game.querySelectorAll(".card").forEach(c => c.remove());
+      game.appendChild(card);
+      card.onclick = (e)=>{
+        if(e.clientX > window.innerWidth/2){
+          correctGuesses.push({name:item,img:img});
+        } else {
+          wrongGuesses.push({name:item,img:img});
         }
-      },1000)
-
-      startBtn.textContent = 'Running...'
-      startBtn.disabled = true
+        currentIndex++;
+        showCard();
+      }
+      document.onkeydown = (e)=>{
+        if(e.key === "ArrowRight"){
+          correctGuesses.push({name:item,img:img});
+          currentIndex++; showCard();
+        } else if(e.key === "ArrowLeft"){
+          wrongGuesses.push({name:item,img:img});
+          currentIndex++; showCard();
+        }
+      }
     }
 
     function endGame(){
-      if(timer) clearInterval(timer)
-      startBtn.disabled = false
-      startBtn.textContent = 'Start Game'
-      // show modal results
-      resultSummary.innerHTML = `You guessed <strong>${rightGuesses.length}</strong> correct and <strong>${wrongGuesses.length}</strong> wrong.`
-      resultsDetails.innerHTML = `<h3>Correct</h3>` + rightGuesses.map(g=>`<div style="display:flex;gap:8px;align-items:center;margin:6px 0"><img src='${g.img}' style='width:60px;height:40px;object-fit:cover;border-radius:6px'/> <div><strong>${g.title}</strong></div></div>`).join('')
-      resultsDetails.innerHTML += `<h3 style='margin-top:10px'>Wrong</h3>` + wrongGuesses.map(g=>`<div style="display:flex;gap:8px;align-items:center;margin:6px 0"><img src='${g.img}' style='width:60px;height:40px;object-fit:cover;border-radius:6px'/> <div><strong>${g.title}</strong></div></div>`).join('')
-      resultsModal.style.display = 'flex'
+      clearInterval(timerInterval);
+      document.getElementById("correctCount").textContent = correctGuesses.length;
+      document.getElementById("wrongCount").textContent = wrongGuesses.length;
+      document.getElementById("correctList").innerHTML = correctGuesses.map(g=>`<div><img src="${g.img}">${g.name}</div>`).join("");
+      document.getElementById("wrongList").innerHTML = wrongGuesses.map(g=>`<div><img src="${g.img}">${g.name}</div>`).join("");
+      document.getElementById("resultsModal").style.display = "flex";
     }
 
-    function recordGuess(isCorrect){
-      if(!deck.length) return
-      const item = deck[index % deck.length]
-      if(isCorrect) rightGuesses.push(item)
-      else wrongGuesses.push(item)
-      index++
-      renderCard()
-      updateStats()
+    function closeModal(){
+      document.getElementById("resultsModal").style.display = "none";
     }
 
-    // click handler on overlay
-    overlay.addEventListener('click', (e)=>{
-      const rect = overlay.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const half = rect.width/2
-      recordGuess(x>half)
-    })
-
-    // also support the separate buttons
-    wrongBtn.addEventListener('click',()=>recordGuess(false))
-    rightBtn.addEventListener('click',()=>recordGuess(true))
-
-    // keyboard support
-    window.addEventListener('keydown',(e)=>{
-      if(e.key === 'ArrowRight') recordGuess(true)
-      if(e.key === 'ArrowLeft') recordGuess(false)
-    })
-
-    startBtn.addEventListener('click',startGame)
-
-    playAgainBtn.addEventListener('click',()=>{resultsModal.style.display='none';startGame()})
-    closeResultsBtn.addEventListener('click',()=>{resultsModal.style.display='none'})
-
-    downloadReportBtn.addEventListener('click',()=>{
-      const report = {deckType:deckSelect.value,timePlayed:parseInt(timeSec.value||0,10),correct:rightGuesses,wrong:wrongGuesses}
-      const blob = new Blob([JSON.stringify(report,null,2)],{type:'application/json'})
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url; a.download = 'party_guessing_report.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url)
-    })
-
-    // initial render
-    timeLeftEl.textContent = 0
-
-    // Note to developer / user: If you'd rather use professional movie APIs (TMDb or OMDb) to get posters & metadata,
-    // you can swap the wikiPosterFor() implementation for TMDb/OMDb fetches (those need API keys). See instructions in chat.
+    function downloadResults(){
+      const results = {correct: correctGuesses, wrong: wrongGuesses};
+      const blob = new Blob([JSON.stringify(results,null,2)], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "results.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
   </script></body>
 </html>
